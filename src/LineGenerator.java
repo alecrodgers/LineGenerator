@@ -1,6 +1,11 @@
 
-
 import javafx.scene.paint.Color;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -18,16 +23,16 @@ public class LineGenerator extends Application {
 	// GUI variables
 	BorderPane root = new BorderPane();
 	HBox hBox = new HBox();
-	Canvas canvas = new Canvas(1350,750);
-	Button btn = new Button("Generate Lines");
-	Button btn1 = new Button("Clear");
+	Canvas canvas = new Canvas(1350, 750);
+	Button btn = new Button("Simple Scan Conversion");
+	Button btn1 = new Button("Bresenhams Line Scan Conversion");
+	Button btn2 = new Button("Clear");
 	TextField txt = new TextField();
 	Label label = new Label("Number of Lines to generate: ");
+	
 
-	
-	//TODO : Input Box & Submit Button
-	//TODO : Timing Functions & results
-	
+	// TODO : Input Box & Submit Button
+	// TODO : Timing Functions & results
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -38,232 +43,191 @@ public class LineGenerator extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
-		//root.setLeft(hBox);
 		root.setCenter(canvas);
 		root.setBottom(hBox);
 		hBox.setAlignment(Pos.CENTER);
 		root.setPadding(new Insets(15));
-		
-		//ControlPane Nodes
+		hBox.setPadding(new Insets(15));
+
+		// ControlPane Nodes
 		hBox.getChildren().add(label);
 		hBox.getChildren().add(txt);
 		hBox.getChildren().add(btn);
 		hBox.getChildren().add(btn1);
-		
-		//Call Line Function when pressed
-		btn.setOnAction(e->{
-			for(int i = 0; i < Integer.parseInt(txt.getText()); i++) {
-				int x1 = (int)(Math.random()*1350);
-				int y1 = (int)(Math.random()*750);
-				int x2 = (int)(Math.random()*1350);
-				int y2 = (int)(Math.random()*750);
-				
-				//simpleLine(x1,y1,x2,y2);
-				bresenhamLine(x1,y1,x2,y2);
-		}
+		hBox.getChildren().add(btn2);
+
+		// Call Line Function when pressed
+		btn.setOnAction(e -> {
+			//Number or lines to generate
+			int n = Integer.parseInt(txt.getText());
+			
+			//Log System Time required to draw N lines
+			long time = System.currentTimeMillis();
+			
+			//Generate endpoints for N lines and draw them
+			for (int i = 0; i < n; i++) {
+				int x1 = (int) (Math.random() * 1350);
+				int y1 = (int) (Math.random() * 750);
+				int x2 = (int) (Math.random() * 1350);
+				int y2 = (int) (Math.random() * 750);
+
+				bhm_line(x1, y1, x2, y2);
+				primaryStage.show();
+
+			}
+			time = System.currentTimeMillis() - time;
+			String result = "Bresenham's Line Scan Conversion took [" + time + "] milliseconds to draw [" + n +"] lines" ;
+			System.out.println(result);
 		});
+
+		// Call Line Function when pressed
+				btn1.setOnAction(e -> {
+					//Number or lines to generate
+					int n = Integer.parseInt(txt.getText());
+					
+					//Log System Time required to draw N lines
+					long time = System.currentTimeMillis();
+					
+					//Generate endpoints for N lines and draw them
+					for (int i = 0; i < n; i++) {
+						int x1 = (int) (Math.random() * 1350);
+						int y1 = (int) (Math.random() * 750);
+						int x2 = (int) (Math.random() * 1350);
+						int y2 = (int) (Math.random() * 750);
+						
+						simpleLine(x1, y1, x2, y2);
+						primaryStage.show();
+
+					}
+					time = System.currentTimeMillis() - time;
+					String result = "Simple Line Scan Conversion took [" + time + "] milliseconds to draw [" + n +"] lines" ;
+					System.out.println(result);
+				});
 		
-		btn1.setOnAction(e->{
+		btn2.setOnAction(e -> {
 			canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 		});
+
 		
-		//brez(403,85,366,662);
-		//drawline(403,85,366,662);
-		bresenhamLine(403,85,366,662);
-		//simpleLine(403,85,366,662);
-		//simpleLine(377,224,262,551);
-		//pixel(1,1);
-		
+		bhm_line(403, 85, 366, 662);
+		// simpleLine(403,85,366,662);
+		// simpleLine(377,224,262,551);
+
 		// Initialize and Show Scene
-		Scene scene = new Scene(root, 1400, 800);
+		Scene scene = new Scene(root, 1500, 900);
 		primaryStage.setTitle("TEA Test Display");
 		primaryStage.setScene(scene);
 		primaryStage.sizeToScene();
 		primaryStage.show();
 
 	}
-	
-	
-	
-	
-	
-	
-	
 
-	public void simpleLine(int x0, int y0, int x1, int y1){
+	public void simpleLine(int x0, int y0, int x1, int y1) {
 		double dX = x0 - x1;
 		double dY = y0 - y1;
 		double m;
 		double m2; // slope in terms of X instead of Y
-		if(dX == 0){
+		
+		if (dX == 0) {
 			m = 0;
 			m2 = m;
 		} else {
-			m = dY/dX;
-			m2 = dX/dY; 
+			m = dY / dX;
+			m2 = dX / dY;
 		}
 		dX = Math.abs(dX);
 		dY = Math.abs(dY);
 		int x = x0;
 		int y = y0;
-		
 
-		//Debug Prints
-		System.out.println(0 < (dX-1));
-		System.out.println("dX = " + dX);
-		System.out.println("dY = " + dY);
-		System.out.println("X0 = " + x0);
-		System.out.println("Y0 = " + y0);
-		System.out.println("X1 = " + x1);
-		System.out.println("Y1 = " + y1);
-
-		if(dX > dY) {
-			for(int i = 0; i < (dX - 1); i++) {
-				x = (int)(x0 + i);
-				y = (int)((m*i) + y0);
-				pixel(x,y);
+		if (dX > dY) {
+			for (int i = 0; i < (dX - 1); i++) {
+				x = (int) (x0 + i);
+				y = (int) ((m * i) + y0);
+				pixel(x, y);
 
 			}
 		} else {
-			for(int i = 0; i <= (dY - 1); i++) { 
-				y = (int)(y0 + i);
-				x = (int)((m2*i) + x0);
-				pixel(x,y);
+			for (int i = 0; i <= (dY - 1); i++) {
+				y = (int) (y0 + i);
+				x = (int) ((m2 * i) + x0);
+				pixel(x, y);
 			}
-			
-			
-		}
-		//Debug Prints
-		System.out.println("X = " + x);
-		System.out.println("Y = " + y);
 
+		}
+		
 	}
 
-	
-			//TODO : Remove this function
-			public void pixel(int x, int y) {
-				canvas.getGraphicsContext2D().getPixelWriter().setColor(x, y, Color.BLACK);
-				
+	// TODO : Remove this function
+	public void pixel(int x, int y) {
+		canvas.getGraphicsContext2D().getPixelWriter().setColor(x, y, Color.BLACK);
+	}
+
+	// Implementation of Bresenham's Line Scan Conversion Algorithm
+	// Source Code provided by StackOverflow User 'Avi'
+	// https://stackoverflow.com/questions/10060046/drawing-lines-with-bresenhams-line-algorithm#16405254
+	// Accessed 2.1.2020
+	void bhm_line(int x1, int y1, int x2, int y2) {
+		int x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
+		dx = x2 - x1;
+		dy = y2 - y1;
+		dx1 = Math.abs(dx);
+		dy1 = Math.abs(dy);
+		px = 2 * dy1 - dx1;
+		py = 2 * dx1 - dy1;
+		if (dy1 <= dx1) {
+			if (dx >= 0) {
+				x = x1;
+				y = y1;
+				xe = x2;
+			} else {
+				x = x2;
+				y = y2;
+				xe = x1;
 			}
-			
-			
-			
-			//TODO : Implement Bresenhams Algorithm
-			void bresenhamLine(int x0, int y0, int x1, int y1) {
-				double dX = x0 - x1;
-				double dY = y0 - y1;
-				double e = 2 * dX - dY;
-				int inc1 = (int)(2 * dY);
-				int inc2 = (int)-(2 * (dY-dX));
-				int x,y;
-				if(x0 < x1) {
-					x = x0;
-					y = y0;
+			pixel(x, y);
+			for (i = 0; x < xe; i++) {
+				x = x + 1;
+				if (px < 0) {
+					px = px + 2 * dy1;
 				} else {
-					x = x1;
-					y = y1;
-				}
-				
-				System.out.println("M = " + (dY/dX));
-				System.out.println("inc1 = " + inc1);
-				System.out.println("inc2 = " + inc2);
-
-				dX = Math.abs(dX);
-				dY = Math.abs(dY);
-				
-				
-				//Debug Prints
-//				System.out.println(0 < (dX-1));
-				System.out.println("dX = " + dX);
-				System.out.println("dY = " + dY);
-//				System.out.println("X0 = " + x0);
-//				System.out.println("Y0 = " + y0);
-//				System.out.println("X1 = " + x1);
-//				System.out.println("Y1 = " + y1);
-//				
-				
-				if(dX > dY) {
-					
-					while(x < x1) {
-						pixel(x,y);
-						if(e < 0) {
-							e = e+inc1;
-						} else {
-							y = y+1;
-							e = e+inc2;
-						}	
-						x = x+1;
+					if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) {
+						y = y + 1;
+					} else {
+						y = y - 1;
 					}
+					px = px + 2 * (dy1 - dx1);
+				}
+
+				pixel(x, y);
+			}
+		} else {
+			if (dy >= 0) {
+				x = x1;
+				y = y1;
+				ye = y2;
+			} else {
+				x = x2;
+				y = y2;
+				ye = y1;
+			}
+			pixel(x, y);
+			for (i = 0; y < ye; i++) {
+				y = y + 1;
+				if (py <= 0) {
+					py = py + 2 * dx1;
 				} else {
-					while(y < y1) {
-						pixel(x,y);
-						if(e < 0) {
-							e = e+inc1;
-						} else {
-							x = x+1;
-							e = e+inc2;
-						}	
-						y = y+1;
+					if ((dx < 0 && dy < 0) || (dx > 0 && dy > 0)) {
+						x = x + 1;
+					} else {
+						x = x - 1;
 					}
-					//if Line is Vertical
+					py = py + 2 * (dx1 - dy1);
 				}
-				
-				//Debug Prints
-				System.out.println("Last X = " + x);
-				System.out.println("Last Y = " + y + "\n==================");
+
+				pixel(x, y);
 			}
-			
-			
-			void brez(int x1, int y1, int x2, int y2)
-			{
-				int m_new = 2 * (y2 - y1); 
-				   int slope_error_new = m_new - (x2 - x1); 
-				   for (int x = x1, y = y1; x <= x2; x++) 
-				   { 
-				     pixel(x,y);
-				  
-				      // Add slope to increment angle formed 
-				      slope_error_new += m_new; 
-				  
-				      // Slope error reached limit, time to 
-				      // increment y and update slope error. 
-				      if (slope_error_new >= 0) 
-				      { 
-				         y++; 
-				         slope_error_new  -= 2 * (x2 - x1); 
-				      } 
-				   } 
-			}
-			
-			
-			void drawline(int x0, int y0, int x1, int y1)
-			{
-			    int dx, dy, p, x, y;
-
-			    dx=x1-x0;
-			    dy=y1-y0;
-
-			    x=x0;
-			    y=y0;
-
-			    p=2*dy-dx;
-
-			    while(x<x1)
-			    {
-			        if(p>=0)
-			        {
-			            pixel(x,y);
-			            y=y+1;
-			            p=p+2*dy-2*dx;
-			        }
-			        else
-			        {
-			            pixel(x,y);
-			            p=p+2*dy;
-			        }
-			        x=x+1;
-			    }
-			}
-			
-
 		}
+	}
+
+}
